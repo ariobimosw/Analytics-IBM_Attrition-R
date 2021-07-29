@@ -1,0 +1,295 @@
+---
+title:  IBM Attrition Analytics
+author: by Ariobimo Singgih W. 
+date: 27 July 2021
+output: 
+  html_document:
+    theme: lumen
+    toc: true
+    toc_float: true
+    df_print: paged
+---
+## Initiation {.tabset}
+### What is IBM?
+**International Business Machines Corporation (IBM)** is an American multinational technology company headquartered in Armonk, New York, with operations in over 170 countries. The company began in 1911, founded in Endicott, New York, as the Computing-Tabulating-Recording Company (CTR) and was renamed "International Business Machines" in 1924. IBM is incorporated in New York.
+
+
+### History
+In the 1880s, technologies emerged that would ultimately form the core of **International Business Machines (IBM)**. Julius E. Pitrap patented the computing scale in 1885. Alexander Dey invented the dial recorder (1888). Herman Hollerith (1860–1929) patented the Electric Tabulating Machine. and Willard Bundy invented a time clock to record a worker's arrival and departure time on a paper tape in 1889. On June 16, 1911, their four companies were amalgamated in New York State by Charles Ranlett Flint forming a fifth company, the Computing-Tabulating-Recording Company (CTR) based in Endicott, New York. The five companies had 1,300 employees and offices and plants in Endicott and Binghamton, New York; Dayton, Ohio; Detroit, Michigan; Washington, D.C.; and Toronto.
+
+### Analytics Case Explanation
+This analytics conclude the IBM's employees attrition data. From analyzing the data then making a conclusion of the attrition of the IBM company and only using the basic of R Language. 
+
+## Inspect the data
+In this step we initially read the "csv" file then check if there is missing value or not and inspect the data type from each column.
+
+
+### Read the Data
+```{r}
+IBM_attr <- read.csv("IBM-attr.csv")
+```
+
+### **NA** Value Check
+```{r}
+NA_check <- colSums(is.na(IBM_attr))
+NA_check
+```
+We can see there is no **NA** Value from each column and we are good to continue to analyze the data
+
+### Data Type Check
+```{r}
+str(IBM_attr)
+```
+As shown in the table above, there are incorrect data type from some columns : `Attrition`, `BusinessTravel`, `Department`, `EducationField`, `Gender`, `JobRole`, `MaritalStatus`, `OverTime`. 
+
+## Data Cleansing & Coertion{.tabset}
+In this step we have to manually correct the data type from each column to be correspond. 
+
+### Data Coertion
+```{r}
+#correcting data type of each column
+IBM_attr$Attrition <- as.factor(IBM_attr$Attrition)
+IBM_attr$BusinessTravel <- as.factor(IBM_attr$BusinessTravel)
+IBM_attr$Department <- as.factor(IBM_attr$Department)
+IBM_attr$EducationField <- as.factor(IBM_attr$EducationField)
+IBM_attr$Gender <- as.factor(IBM_attr$Gender)
+IBM_attr$JobRole <- as.factor(IBM_attr$JobRole)
+IBM_attr$MaritalStatus <- as.factor(IBM_attr$MaritalStatus)
+IBM_attr$OverTime <- as.factor(IBM_attr$OverTime)
+```
+### Data Wrangling
+Some columns only contain numeric value that represent **low to very high** scale or even identify some categories based on the list referring to the author of the data. So we have to manually switch the numeric value to the criteria based on the list.
+```{r}
+# Switching all columns that contain numeric value to the determined conditions
+IBM_attr$Education <- sapply(as.character(IBM_attr$Education), switch,
+                             "1" = "Below College",
+                             "2" = "College",
+                             "3" = "Bachelor",
+                             "4" =  "Master",
+                             "5" = "Doctor")
+IBM_attr$Education <- as.factor(IBM_attr$Education)
+
+IBM_attr$EnvironmentSatisfaction <- sapply(as.character(IBM_attr$EnvironmentSatisfaction), switch,
+                             "1" = "Low",
+                             "2" = "Medium",
+                             "3" = "High",
+                             "4" =  "Very High")
+IBM_attr$EnvironmentSatisfaction <- as.factor(IBM_attr$EnvironmentSatisfaction)
+
+IBM_attr$JobInvolvement <- sapply(as.character(IBM_attr$JobInvolvement), switch,
+                             "1" = "Low",
+                             "2" = "Medium",
+                             "3" = "High",
+                             "4" =  "Very High")
+IBM_attr$JobInvolvement <- as.factor(IBM_attr$JobInvolvement)
+
+IBM_attr$JobSatisfaction <- sapply(as.character(IBM_attr$JobSatisfaction), switch,
+                             "1" = "Low",
+                             "2" = "Medium",
+                             "3" = "High",
+                             "4" =  "Very High")
+IBM_attr$JobSatisfaction <- as.factor(IBM_attr$JobSatisfaction)
+
+IBM_attr$PerformanceRating <- sapply(as.character(IBM_attr$PerformanceRating), switch,
+                             "1" = "Low",
+                             "2" = "Good",
+                             "3" = "Excellent",
+                             "4" =  "Outstanding")
+IBM_attr$PerformanceRating <- as.factor(IBM_attr$PerformanceRating)
+
+IBM_attr$RelationshipSatisfaction <- sapply(as.character(IBM_attr$RelationshipSatisfaction), switch,
+                             "1" = "Low",
+                             "2" = "Medium",
+                             "3" = "High",
+                             "4" =  "Very High")
+IBM_attr$RelationshipSatisfaction <- as.factor(IBM_attr$RelationshipSatisfaction)
+
+IBM_attr$WorkLifeBalance <- sapply(as.character(IBM_attr$WorkLifeBalance), switch,
+                             "1" = "Bad",
+                             "2" = "Good",
+                             "3" = "Better",
+                             "4" =  "Best")
+IBM_attr$WorkLifeBalance <- as.factor(IBM_attr$WorkLifeBalance)
+head(IBM_attr)
+```
+Afterwards we are good to initialize to make critical analysis of the data.
+
+## Data Analyzing
+Here is the List of Critical Analysis from the IBM Employee attrition data :
+
+  1. Which *Department* has the most "Yes" attrition status?
+  2. Top 3 of "Job Role" has the most "Yes" attrition status?
+  3. How many "YearsAtCompany" average are employees have been worked and decided to resign? (from each Jobrole)
+  4. Based on previous analysis, what is the average "MonthlyIncome" of the *Research & Development* and *Sales* employees?
+  5. Based on no. 1, do the employees mostly have "Over Time"? 
+  6. Based on no. 1, how is the "Job Involvement" are the employees have?
+  7. Which *Department* has the most "No" attrition status?
+  8. based on no.7, how is the "Environment Satisfaction" are the employees mostly had?
+  9. based on no.7, higher of the "College Education" in what "Education Field" are the employees?
+  10. What lowest "Education" does the employee has within the top 3 of high "Monthly Income"?
+  11. What "Job Role" has mostly the *Best* "Work Life Balance"
+  12. Who are the best employees based on the "Performance Rating", "Relationship Satisfaction", and "Job involvement" from each            *Department* ("No" Attrition Status)? (mention the employee number)
+
+## Data Analytics Solution
+
+### 1. Attrition Status Ratio
+What attrition status most of the data is? (Percentage)
+```{r}
+IBM_attr_ratio <- as.data.frame(round(prop.table(table(AttritionStatus = IBM_attr$Attrition ))*100,2))
+IBM_attr_ratio
+```
+**Answer :** "No" Attrition status has higher ratio than "Yes".
+
+### 2. Highest count of "Yes" attrition Department
+Which *Department* has most "Yes" attrition status?
+```{r}
+IBM_attr_yes <- IBM_attr[IBM_attr$Attrition == "Yes",]
+df_most_attrition <- as.data.frame(table(Department = IBM_attr_yes$Department))
+df_most_attrition <- df_most_attrition[order(df_most_attrition$Freq, decreasing = T),]
+round(prop.table(table(Department = IBM_attr_yes$Department))*100,2)
+ 
+```
+**Answer :** The proportion of belonging "Yes" attrition status between those three departments are dominated by **Research & Development** with **56,12%**.
+
+### 3. Top 3 Job Role with highest count of "Yes" attrition 
+Top 3 of "Job Role" has most "Yes" attrition status?
+```{r}
+#IBM_attr_yes is the object from analysis no. 1
+dfJR_most_attr <- as.data.frame(table(JobRole = IBM_attr_yes$JobRole))
+dfJR_most_attr<- dfJR_most_attr[order(dfJR_most_attr$Freq, decreasing = T),] # Descending sorting based on the attrition count
+head(dfJR_most_attr,3) # Showing the top 3 of the data frame that has been sorted descendingly
+```
+**Answer :** Laboratory Technician, Sales Executive, and Research Scientist has the most attrition count.
+
+### 4. "YearsAtCompany" Average
+How many average "YearsAtCompany" are employees have been worked and decided to resign? (from each Jobrole)
+```{r}
+aggregate(YearsAtCompany~JobRole, data = IBM_attr_yes, FUN = mean)
+```
+**Answer :** Average of **Years at Company** has been shown in the table above.
+
+### 5. "Sales" & "RnD" **MonthlyIncome** Average
+Based on previous analysis, what is the "MonthlyIncome" average of the *Research & Development* and *Sales* employees?
+```{r}
+IBM_attr_yes_rnds <- IBM_attr_yes[IBM_attr_yes$Department %in% c("Research & Development","Sales"),] # Groupping by determined departments
+aggregate(MonthlyIncome ~ Department, IBM_attr_yes_rnds, FUN = mean)
+```
+**Answer :** Average of **Monthly Income** has been shown in the Dataframe above.
+
+### 6. **OverTime** Effect
+Based on no. 2, do the employees mostly have "Over Time"? 
+```{r}
+IBM_attr_yes_OT <- as.data.frame(table(Department = IBM_attr_yes$Department,OverTime = IBM_attr_yes$OverTime))
+IBM_attr_OT_rnd <- aggregate(Freq~OverTime, data = IBM_attr_yes_OT[IBM_attr_yes_OT$OverTime %in% c("Yes","No") & IBM_attr_yes_OT$Department =="Research & Development",],FUN = sum)
+IBM_attr_OT_rnd$Higher <- IBM_attr_OT_rnd$Freq > min(IBM_attr_OT_rnd$Freq)
+IBM_attr_OT_rnd
+```
+**Answer :** Most of the **Research & Development** employees had Overtime before they finally decided to resign.
+
+### 7. The **JobInvolvement** 
+Based on no. 2, how is the "Job Involvement" are the employees have?
+```{r}
+IBM_attr_yes_rnd <- IBM_attr_yes[IBM_attr_yes$Department == "Research & Development",]
+IBM_attr_yes_rnd_inv <- as.data.frame(table(JobRole = IBM_attr_yes_rnd$JobRole, RnD_JobInvolvement = IBM_attr_yes_rnd$JobInvolvement))
+IBM_attr_yes_rnd_inv <- aggregate(Freq ~ RnD_JobInvolvement, data = IBM_attr_yes_rnd_inv[IBM_attr_yes_rnd_inv$RnD_JobInvolvement %in% c("Low","Medium","High","Very High"),],FUN = sum )
+IBM_attr_yes_rnd_inv <- IBM_attr_yes_rnd_inv[order(IBM_attr_yes_rnd_inv$Freq, decreasing =T),]
+```
+**Answer :** Most of the **Research & Development** employees are High involved to the company before decided to resign. 
+
+### 8. Lowest count of "No" attrition Department
+Which *Department* has most "No" attrition status?
+```{r}
+IBM_attr_no <- IBM_attr[IBM_attr$Attrition == "No",]
+IBM_attr_no <- round(prop.table(table(Department = IBM_attr_no$Department))*100,2)
+IBM_attr_no
+```
+
+**Answer :** **Research & Development** has the highest proportion count of "No" Attrition status.
+
+### 9. Employees' **Environment Satisfaction** 
+based on no.8, how is the "Environment Satisfaction" are the employees mostly had?
+```{r}
+IBM_attr_no_RND <- IBM_attr[IBM_attr$Attrition == "No" & IBM_attr$Department == "Research & Development",]
+IBM_attr_no_RND$JobRole <- droplevels(IBM_attr_no_RND$JobRole)
+IBM_attr_no_RND <- round(prop.table(table(EnvironmentSatisfaction = IBM_attr_no_RND$EnvironmentSatisfaction))*100,2)
+```
+**Answer :** Most employees have **Very High** environment satisfaction.
+
+### 10. Employees' **Education Field**
+based on no.8, above of the "College Education" in what "Education Field" are the employees?
+```{r}
+
+IBM_attr_9 <- IBM_attr[IBM_attr$Attrition == "No" & IBM_attr$Department == "Research & Development",]
+IBM_attr_9 <- IBM_attr_9[IBM_attr_9$Education %in% c("Bachelor","Master","Doctor"),]
+IBM_attr_9 <- as.data.frame(table(EducationField = IBM_attr_9$EducationField))
+IBM_attr_9 <- IBM_attr_9[order(IBM_attr_9$Freq, decreasing = T),]
+```
+**Answer :** List of employees' Education Field with higher than college education are shown in the table above.
+
+### 11. Lowest employees' **Education**
+What lowest "Education" does the employee has within the top 3 of high "Monthly Income"?
+```{r}
+
+IBM_attr_10 <- head(IBM_attr[order(IBM_attr$MonthlyIncome, decreasing = T),],3)
+IBM_attr_10 <- IBM_attr_10[,c("Education","JobInvolvement","JobRole","MonthlyIncome")]
+IBM_attr_10
+
+```
+**Answer :** Lowest education of the top 3 employees with high income is the "Below College" Education.
+
+### 12. Employees' **WorkLifeBalance**
+What "Job Role" has most *Best* "Work Life Balance"? (Top 3)
+```{r}
+
+IBM_attr_11 <- IBM_attr[IBM_attr$WorkLifeBalance == "Best",]
+IBM_attr_11<- as.data.frame(table(JobRole = IBM_attr_11$JobRole, WorkLifeBalance = IBM_attr_11$WorkLifeBalance))
+IBM_attr_11 <- IBM_attr_11[IBM_attr_11$Freq != 0,]
+IBM_attr_11 <- IBM_attr_11[order(IBM_attr_11$Freq, decreasing = T),]
+head(IBM_attr_11,3)
+```
+**Answer :** Top 3 Job Role with **Best** Work Life Balance are "Sales Executive", "Laboratory Technician", "Research Scientist".
+
+### 13. Best Employees
+Who are the best employees based on the "Performance Rating", "Relationship Satisfaction", and "Job involvement" from each *Department* ("No" Attrition Status)? (mention the employee number)
+```{r}
+# Filtering data based on each Department and make them as an object
+IBM_attr_12_Sales <- IBM_attr[IBM_attr$Attrition == "No" & IBM_attr$Department == "Sales",]
+IBM_attr_12_RND <- IBM_attr[IBM_attr$Attrition == "No" & IBM_attr$Department == "Research & Development",]
+IBM_attr_12_HR <- IBM_attr[IBM_attr$Attrition == "No" & IBM_attr$Department == "Human Resources",]
+
+# Filtering data based on given criteria from the analysis for each object
+IBM_attr_12_Sales <- IBM_attr_12_Sales[IBM_attr_12_Sales$JobInvolvement == "Very High" & IBM_attr_12_Sales$PerformanceRating == "Outstanding" & IBM_attr_12_Sales$RelationshipSatisfaction == "Very High",]
+IBM_attr_12_RND <- IBM_attr_12_RND[IBM_attr_12_RND$JobInvolvement == "Very High" & IBM_attr_12_RND$PerformanceRating == "Outstanding" & IBM_attr_12_RND$RelationshipSatisfaction == "Very High",]
+IBM_attr_12_HR <- IBM_attr_12_HR[IBM_attr_12_HR$JobInvolvement %in% c("Very High","High") & IBM_attr_12_HR$PerformanceRating == "Outstanding" & IBM_attr_12_HR$RelationshipSatisfaction == "Very High",]
+
+# Merging three objects that have fulfilled the criteria
+IBM_attr_12 <- rbind(IBM_attr_12_Sales,IBM_attr_12_RND,IBM_attr_12_HR)
+IBM_attr_12 <- IBM_attr_12[,c("Department","EmployeeNumber","PerformanceRating","RelationshipSatisfaction","JobInvolvement")]
+IBM_attr_12
+```
+**Answer :** There are five best employees based on the given criteria. Their EmployeeNumber are **653**, **807**, **103**, **177**, **1550**.
+
+## Conclusion {.tabset}
+
+### Explanation
+
+We can conlude that this company still have least of employees attrition. Research & Development department has the most attrition status wether it is **Yes** or **No** status.
+Most of resigned employees might be caused by the **OverTime** due to the count of **OverTime** analysis.
+The good things for the company are most of the employees have given the very high **JobInvolvement** to the company and they have very high of **EnvironmentSatisfaction** either. However, the **JobInvolvement** of the best employee from HR Department is only High.
+
+### Business Recommendation 
+
+1. The company has to be more concerned to the employees' desire in order to make the employees feel comfortable to work at the company due to the Laboratory Technician has most "Yes" attrition.
+2. **OverTime** is giving big impact to the attrition of the employees. The company needs to evaluate the working hour system for each department.
+3. Most of the best employees are only have "High" **JobInvolvement**. The company needs to evaluate their work, why could they only have high job involvement due to **JobInvolvement** is one of the biggest factor that make an impact to the company.  
+
+
+
+
+
+
+
+
+
+
+
